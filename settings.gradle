@@ -1,0 +1,6 @@
+rootProject.name = 'Db2SourceCli'
+
+
+include ':db2source'
+project(':db2source').projectDir=new File("$settingsDir/../db2source")
+
