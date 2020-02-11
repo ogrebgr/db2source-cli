@@ -44,6 +44,7 @@ fun main(args: Array<String>) {
 
     // TODO load drivers depending on conf
     Class.forName("com.mysql.jdbc.Driver")
+    Class.forName("org.postgresql.Driver")
 
     val db2source = Db2Source()
     val rez = db2source.generate(config)
