@@ -78,6 +78,7 @@ class ConfigDataLoader {
     private val KEY_SOURCE_TABLE = "source_table"
     private val KEY_DESTINATION_CLASS_NAME = "destination_class_name"
     private val KEY_DESTINATION_DIR = "destination_dir"
+    private val KEY_ADD_PAGINATION_METHODS = "add_pagination_methods"
 
     fun load(prop: Properties): ConfigData {
         val dsn = prop.getProperty(KEY_DSN)
@@ -128,9 +129,14 @@ class ConfigDataLoader {
             exitProcess(4)
         }
 
+        val addPaginationMethods = prop.getProperty(KEY_ADD_PAGINATION_METHODS)
+        val addPaginationMethodsFinal: Boolean = addPaginationMethods.equals("1") || addPaginationMethods.lowercase(Locale.getDefault()).equals("yes") ||
+                addPaginationMethods.lowercase(Locale.getDefault()).equals("y")
+
+
         val tc = TableConfig(sourceTable, className, dir)
 
-        return ConfigData(dsn, username, password, schema, listOf(tc))
+        return ConfigData(dsn, username, password, schema, listOf(tc), addPaginationMethodsFinal)
     }
 
 
