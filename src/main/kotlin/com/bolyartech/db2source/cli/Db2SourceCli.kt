@@ -80,6 +80,7 @@ class ConfigDataLoader {
     private val KEY_DESTINATION_DIR = "destination_dir"
     private val KEY_ADD_PAGINATION_METHODS = "add_pagination_methods"
     private val KEY_CREATE_VALUE_CLASS_FOR_ID = "create_value_class_for_id"
+    private val KEY_ADD_DEPENDENCY_INJECTION_CODE = "add_dependency_injection_code"
 
     fun load(prop: Properties): ConfigData {
         val dsn = prop.getProperty(KEY_DSN)
@@ -138,9 +139,13 @@ class ConfigDataLoader {
         val createValueClassForIdFinal: Boolean = createValueClassForId.equals("1") || createValueClassForId.lowercase(Locale.getDefault()).equals("yes") ||
                 createValueClassForId.lowercase(Locale.getDefault()).equals("y")
 
+        val addDiCode = prop.getProperty(KEY_ADD_DEPENDENCY_INJECTION_CODE)
+        val addDiCodeFinal: Boolean = addDiCode.equals("1") || addDiCode.lowercase(Locale.getDefault()).equals("yes") ||
+                addDiCode.lowercase(Locale.getDefault()).equals("y")
+
         val tc = TableConfig(sourceTable, className, dir)
 
-        return ConfigData(dsn, username, password, schema, listOf(tc), addPaginationMethodsFinal, createValueClassForIdFinal)
+        return ConfigData(dsn, username, password, schema, listOf(tc), addPaginationMethodsFinal, createValueClassForIdFinal, addDiCodeFinal)
     }
 
 
