@@ -1,10 +1,13 @@
 package com.bolyartech.db2source.cli
 
+import com.andreapivetta.kolor.green
+import com.andreapivetta.kolor.red
 import com.bolyartech.db2source.*
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Options
 import java.io.*
+import java.lang.System.exit
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -23,7 +26,7 @@ fun main(args: Array<String>) {
 
     val confFile = File(configPath)
     if (!confFile.exists()) {
-        println("ERROR: Cannot find configuration file: $confFile")
+        errorMessage("Cannot find configuration file: $confFile")
     }
 
     println("Will try to load configuraton from $confFile")
@@ -34,7 +37,7 @@ fun main(args: Array<String>) {
         prop.load(`is`)
         `is`.close()
     } catch (e: IOException) {
-        println("Cannot load config file. ${e.message}")
+        errorMessage("Cannot load config file. ${e.message}")
         exitProcess(2)
     }
 
@@ -47,13 +50,29 @@ fun main(args: Array<String>) {
     Class.forName("org.postgresql.Driver")
 
     val db2source = Db2Source()
-    val rez = db2source.generate(config)
-    when (rez) {
-        is GenerationResultOk -> println("Generation SUCCESS")
-        is GenerationResultErrorCannotConnectDb -> println("Cannot connect to DB: ${rez.reason}")
-        is GenerationResultError -> println("Error: ${rez.reason}")
-    }
+    try {
+        val oc = db2source.generate(config)
+        when (oc) {
+            is GenerationResultOk -> {
+                println("+++".green())
+                println("\uD83D\uDE00 Successfully generated: ${oc.generatedFileName}".green())
+                println("+++".green())
+            }
 
+            is GenerationResultErrorCannotConnectDb -> errorMessage("Cannot connect to DB: ${oc.reason}")
+            is GenerationResultError -> errorMessage(oc.reason)
+            is GenerationResultErrorTableNotFound -> errorMessage("DB table '${oc.table}' not found")
+        }
+    } catch (e: Exception) {
+        errorMessage("Error: ${e.message}".red())
+        exit(1)
+    }
+}
+
+fun errorMessage(msg: String) {
+    println("+++".red())
+    println("\uD83D\uDE31 ERROR: ${msg}".red())
+    println("+++".red())
 }
 
 
@@ -81,6 +100,7 @@ class ConfigDataLoader {
     private val KEY_ADD_PAGINATION_METHODS = "add_pagination_methods"
     private val KEY_CREATE_VALUE_CLASS_FOR_ID = "create_value_class_for_id"
     private val KEY_ADD_DEPENDENCY_INJECTION_CODE = "add_dependency_injection_code"
+    private val KEY_ADD_LOCK_METHOD = "add_lock_method"
 
     fun load(prop: Properties): ConfigData {
         val dsn = prop.getProperty(KEY_DSN)
@@ -143,9 +163,13 @@ class ConfigDataLoader {
         val addDiCodeFinal: Boolean = addDiCode.equals("1") || addDiCode.lowercase(Locale.getDefault()).equals("yes") ||
                 addDiCode.lowercase(Locale.getDefault()).equals("y")
 
+        val addLockMethod = prop.getProperty(KEY_ADD_LOCK_METHOD)
+        val addLockMethodFinal: Boolean = addLockMethod.equals("1") || addLockMethod.lowercase(Locale.getDefault()).equals("yes") ||
+                addLockMethod.lowercase(Locale.getDefault()).equals("y")
+
         val tc = TableConfig(sourceTable, className, dir)
 
-        return ConfigData(dsn, username, password, schema, listOf(tc), addPaginationMethodsFinal, createValueClassForIdFinal, addDiCodeFinal)
+        return ConfigData(dsn, username, password, schema, listOf(tc), addPaginationMethodsFinal, createValueClassForIdFinal, addDiCodeFinal, addLockMethodFinal)
     }
 
 
