@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation project(':db2source')
     implementation 'mysql:mysql-connector-java:8.0.28'
-    implementation 'org.postgresql:postgresql:42.7.7'
+    implementation 'org.postgresql:postgresql:42.7.12'
     implementation 'commons-cli:commons-cli:1.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     testImplementation 'junit:junit:4.13.1'
